@@ -65,43 +65,18 @@ to allow building PHP 7.2, 7.3, and 7.4 on a `windows-2022` image:
 ```yml
 run:
   steps:
-    - name: Delete components
+    - name: Install VC15 component
+      if: ${{ matrix.php == '7.4' || matrix.php == '7.3' || matrix.php == '7.2' }}
       shell: pwsh
       run: |
               Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-              $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-              $componentsToRemove= @(
-                "Microsoft.VisualStudio.Component.VC.v141.x86.x64"
-              )
-              [string]$workloadArgs = $componentsToRemove | ForEach-Object {" --remove " +  $_}
-              $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
-              # should be run twice
-              $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-              $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-
-    - name: Install components
-      shell: pwsh
-      run: |
-              Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-              $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-              $componentsToRemove= @(
-                "Microsoft.VisualStudio.Component.VC.v141.x86.x64"
-              )
-              [string]$workloadArgs = $componentsToRemove | ForEach-Object {" --add " +  $_}
-              $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$workloadArgs, '--quiet', '--norestart', '--nocache')
-              # should be run twice
-              $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-              $process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+              $installPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+              $component = "Microsoft.VisualStudio.Component.VC.v141.x86.x64"
+              $args = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$installPath`"", '--add', $component, '--quiet', '--norestart', '--nocache')
+              $process = Start-Process -FilePath cmd.exe -ArgumentList $args -Wait -PassThru -WindowStyle Hidden
 ```
 
-These steps should be executed _before_ invoking the `setup-php-sdk` action.
-
-An [`if` conditional](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsif)
-can also be used to limit these steps to specific PHP versions. For example:
-
-```yml
-if: ${{ matrix.php == '7.4' || matrix.php == '7.3' || matrix.php == '7.2' }}
-```
+This step should be executed _before_ invoking the `setup-php-sdk` action.
 
 ## Outputs
 
