@@ -83,14 +83,20 @@ Write-Output "Install PHP $phpversion ..."
 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
 $fname = "php-$phpversion-$tspart-$vs-$arch.zip"
 $url = "$baseurl/$fname"
-Invoke-WebRequest $url -OutFile $temp
+Try {
+    Invoke-WebRequest $url -OutFile $temp
+} Catch {
+    $archive = "archives/"
+    $url = "$baseurl/$archive$fname"
+    Invoke-WebRequest $url -OutFile $temp
+}
 Expand-Archive $temp "php-bin"
 
 Write-Output "Install development pack ..."
 
 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
 $fname = "php-devel-pack-$phpversion-$tspart-$vs-$arch.zip"
-$url = "$baseurl/$fname"
+$url = "$baseurl/$archive$fname"
 Invoke-WebRequest $url -OutFile $temp
 Expand-Archive $temp "."
 Rename-Item "php-$phpversion-devel-$vs-$arch" "php-dev"
