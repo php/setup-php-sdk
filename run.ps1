@@ -58,6 +58,8 @@ $releases = @{
     "7.1" = "7.1.33"
     "7.2" = "7.2.34"
     "7.3" = "7.3.33"
+    "7.4" = "7.4.33"
+    "8.0" = "8.0.30"
 }
 $phpversion = $releases.$version
 if (-not $phpversion) {
@@ -83,6 +85,7 @@ Write-Output "Install PHP $phpversion ..."
 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
 $fname = "php-$phpversion-$tspart-$vs-$arch.zip"
 $url = "$baseurl/$fname"
+Write-Output "Downloading $url ..."
 Invoke-WebRequest $url -OutFile $temp
 Expand-Archive $temp "php-bin"
 
@@ -91,6 +94,7 @@ Write-Output "Install development pack ..."
 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
 $fname = "php-devel-pack-$phpversion-$tspart-$vs-$arch.zip"
 $url = "$baseurl/$fname"
+Write-Output "Downloading $url ..."
 Invoke-WebRequest $url -OutFile $temp
 Expand-Archive $temp "."
 Rename-Item "php-$phpversion-devel-$vs-$arch" "php-dev"
@@ -103,9 +107,11 @@ if ($deps.Count -gt 0) {
     foreach ($dep in $deps) {
         foreach ($line in ($series.Content -Split "[\r\n]+")) {
             if ($line -match "^$dep") {
-                Write-Output "Install $line"
+                Write-Output "Install $line ..."
                 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
-                Invoke-WebRequest "$baseurl/$vs/$arch/$line" -OutFile $temp
+                $url = "$baseurl/$vs/$arch/$line"
+                Write-Output "Downloading $url ..."
+                Invoke-WebRequest $url -OutFile $temp
                 Expand-Archive $temp "../deps"
                 $installed = $true
                 break
