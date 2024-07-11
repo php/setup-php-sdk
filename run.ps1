@@ -52,7 +52,7 @@ Invoke-WebRequest $url -OutFile $temp
 Expand-Archive $temp -DestinationPath "."
 Rename-Item "php-sdk-binary-tools-master" "php-sdk"
 
-$baseurl = "https://windows.php.net/downloads/releases/archives"
+$baseurl = "https://downloads.php.net/~windows/releases/archives"
 $releases = @{
     "7.0" = "7.0.33"
     "7.1" = "7.1.33"
@@ -63,12 +63,12 @@ $releases = @{
 }
 $phpversion = $releases.$version
 if (-not $phpversion) {
-    $baseurl = "https://windows.php.net/downloads/releases"
+    $baseurl = "https://downloads.php.net/~windows/releases"
     $url = "$baseurl/releases.json"
     $releases = Invoke-WebRequest $url | ConvertFrom-Json
     $phpversion = $releases.$version.version
     if (-not $phpversion) {
-        $baseurl = "https://windows.php.net/downloads/qa"
+        $baseurl = "https://downloads.php.net/~windows/qa"
         $url = "$baseurl/releases.json"
         $releases = Invoke-WebRequest $url | ConvertFrom-Json
         $phpversion = $releases.$version.version
@@ -100,7 +100,7 @@ Expand-Archive $temp "."
 Rename-Item "php-$phpversion-devel-$vs-$arch" "php-dev"
 
 if ($deps.Count -gt 0) {
-    $baseurl = "https://windows.php.net/downloads/php-sdk/deps"
+    $baseurl = "https://downloads.php.net/~windows/php-sdk/deps"
     $series = Invoke-WebRequest "$baseurl/series/packages-$version-$vs-$arch-staging.txt"
     $remainder = @()
     $installed = $false
