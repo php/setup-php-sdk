@@ -31,7 +31,7 @@ for building and testing PHP extensions on Windows.
 - `deps`: dependency libraries to install; for now, only
   [core dependencies](https://windows.php.net/downloads/php-sdk/deps/) are available
 
-Note that for PHP versions 7.2 and below, `runs-on: windows-2022` will not work
+Note that for PHP versions 7.4 and below, `runs-on: windows-2022` will not work
 as the correct toolset is not available. For these versions, you should use
 `runs-on: windows-2019`. For example:
 
@@ -45,14 +45,38 @@ strategy:
     exclude:
       - { os: windows-2019, php: "8.1" }
       - { os: windows-2019, php: "8.0" }
-      - { os: windows-2019, php: "7.4" }
-      - { os: windows-2019, php: "7.3" }
+      - { os: windows-2022, php: "7.4" }
+      - { os: windows-2022, php: "7.3" }
       - { os: windows-2022, php: "7.2" }
       - { os: windows-2022, php: "7.1" }
 ```
 
 Currently, `windows-2019` may be used for all PHP versions, although this may
 change in future releases.
+
+### Manually Installing Toolsets
+
+It is possible to manually install older toolsets on `windows-2022` using an
+approach suggested in [actions/runner-images#9701](https://github.com/actions/runner-images/issues/9701).
+The following example installs VC15 by its
+[Component ID](https://learn.microsoft.com/en-us/visualstudio/install/workload-component-id-vs-build-tools?view=vs-2022)
+to allow building PHP 7.2, 7.3, and 7.4 on a `windows-2022` image:
+
+```yml
+run:
+  steps:
+    - name: Install VC15 component
+      if: ${{ matrix.php == '7.4' || matrix.php == '7.3' || matrix.php == '7.2' }}
+      shell: pwsh
+      run: |
+              Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+              $installPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+              $component = "Microsoft.VisualStudio.Component.VC.v141.x86.x64"
+              $args = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$installPath`"", '--add', $component, '--quiet', '--norestart', '--nocache')
+              $process = Start-Process -FilePath cmd.exe -ArgumentList $args -Wait -PassThru -WindowStyle Hidden
+```
+
+This step should be executed _before_ invoking the `setup-php-sdk` action.
 
 ## Outputs
 
