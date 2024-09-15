@@ -48,7 +48,7 @@ if (-not $toolset) {
 Write-Output "Install PHP SDK ..."
 
 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
-$url = "https://github.com/php/php-sdk-binary-tools/archive/refs/tags/php-sdk-2.3.0.zip"
+$url = "https://github.com/php/php-sdk-binary-tools/releases/download/php-sdk-2.3.0/php-sdk-binary-tools-php-sdk-2.3.0.zip"
 Invoke-WebRequest $url -OutFile $temp
 Expand-Archive $temp -DestinationPath "."
 Rename-Item "php-sdk-binary-tools-php-sdk-2.3.0" "php-sdk"
