@@ -14,6 +14,11 @@ inputs:
     description: "List of dependency libraries"
     required: false
     default: '@()'
+  cache:
+    description: "Whether the PHP-SDK should be cached"
+    type: boolean
+    required: false
+    default: false
 outputs:
   toolset:
     description: "The required toolset version"
@@ -27,6 +32,24 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Determine current PHP revision
+      id: revision
+      run: ${{github.action_path}}/determine-revision -version ${{inputs.version}}
+      shell: powershell
+    - name: Cache PHP SDK
+      if: ${{inputs.cache == 'true'}}
+      uses: actions/cache@v4
+      with:
+        path: php-sdk
+        key: php-sdk-2.3.0
+    - name: Cache PHP
+      if: ${{inputs.cache == 'true'}}
+      uses: actions/cache@v4
+      with:
+        path: |
+            php-bin
+            php-dev
+        key: php-${{steps.revision.outputs.version}}-${{inputs.arch}}-${{inputs.ts}}
     - id: setup
-      run: ${{github.action_path}}/run -version ${{inputs.version}} -arch ${{inputs.arch}} -ts ${{inputs.ts}} -deps ${{inputs.deps}}
+      run: ${{github.action_path}}/run -version ${{inputs.version}} -revision ${{steps.revision.outputs.version}} -baseurl ${{steps.revision.outputs.baseurl}} -arch ${{inputs.arch}} -ts ${{inputs.ts}} -deps ${{inputs.deps}}
       shell: powershell
