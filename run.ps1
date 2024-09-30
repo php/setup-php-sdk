@@ -1,5 +1,7 @@
 param (
     [Parameter(Mandatory)] [String] $version,
+    [Parameter(Mandatory)] [String] $revision,
+    [Parameter(Mandatory)] [String] $baseurl,
     [Parameter(Mandatory)] [String] $arch,
     [Parameter(Mandatory)] [String] $ts,
     [Parameter(Mandatory)] [AllowEmptyCollection()] [Array] $deps
@@ -45,60 +47,40 @@ if (-not $toolset) {
     throw "toolset not available"
 }
 
-Write-Output "Install PHP SDK ..."
+if (-not (Test-Path "php-sdk")) {
+    Write-Output "Install PHP SDK ..."
 
-$temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
-$url = "https://github.com/php/php-sdk-binary-tools/releases/download/php-sdk-2.3.0/php-sdk-binary-tools-php-sdk-2.3.0.zip"
-Invoke-WebRequest $url -OutFile $temp
-Expand-Archive $temp -DestinationPath "."
-Rename-Item "php-sdk-binary-tools-php-sdk-2.3.0" "php-sdk"
-
-$baseurl = "https://downloads.php.net/~windows/releases/archives"
-$releases = @{
-    "7.0" = "7.0.33"
-    "7.1" = "7.1.33"
-    "7.2" = "7.2.34"
-    "7.3" = "7.3.33"
-    "7.4" = "7.4.33"
-    "8.0" = "8.0.30"
-}
-$phpversion = $releases.$version
-if (-not $phpversion) {
-    $baseurl = "https://downloads.php.net/~windows/releases"
-    $url = "$baseurl/releases.json"
-    $releases = Invoke-WebRequest $url | ConvertFrom-Json
-    $phpversion = $releases.$version.version
-    if (-not $phpversion) {
-        $baseurl = "https://downloads.php.net/~windows/qa"
-        $url = "$baseurl/releases.json"
-        $releases = Invoke-WebRequest $url | ConvertFrom-Json
-        $phpversion = $releases.$version.version
-        if (-not $phpversion) {
-            throw "unknown version"
-        }
-    }
+    $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
+    $url = "https://github.com/php/php-sdk-binary-tools/releases/download/php-sdk-2.3.0/php-sdk-binary-tools-php-sdk-2.3.0.zip"
+    Invoke-WebRequest $url -OutFile $temp
+    Expand-Archive $temp -DestinationPath "."
+    Rename-Item "php-sdk-binary-tools-php-sdk-2.3.0" "php-sdk"
 }
 
 $tspart = if ($ts -eq "nts") {"nts-Win32"} else {"Win32"}
 
-Write-Output "Install PHP $phpversion ..."
+if (-not (Test-path "php-bin")) {
+    Write-Output "Install PHP $revision ..."
 
-$temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
-$fname = "php-$phpversion-$tspart-$vs-$arch.zip"
-$url = "$baseurl/$fname"
-Write-Output "Downloading $url ..."
-Invoke-WebRequest $url -OutFile $temp
-Expand-Archive $temp "php-bin"
+    $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
+    $fname = "php-$revision-$tspart-$vs-$arch.zip"
+    $url = "$baseurl/$fname"
+    Write-Output "Downloading $url ..."
+    Invoke-WebRequest $url -OutFile $temp
+    Expand-Archive $temp "php-bin"
+}
 
-Write-Output "Install development pack ..."
+if (-not (Test-Path "php-dev")) {
+    Write-Output "Install development pack ..."
 
-$temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
-$fname = "php-devel-pack-$phpversion-$tspart-$vs-$arch.zip"
-$url = "$baseurl/$fname"
-Write-Output "Downloading $url ..."
-Invoke-WebRequest $url -OutFile $temp
-Expand-Archive $temp "."
-Rename-Item "php-$phpversion-devel-$vs-$arch" "php-dev"
+    $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
+    $fname = "php-devel-pack-$revision-$tspart-$vs-$arch.zip"
+    $url = "$baseurl/$fname"
+    Write-Output "Downloading $url ..."
+    Invoke-WebRequest $url -OutFile $temp
+    Expand-Archive $temp "."
+    Rename-Item "php-$revision-devel-$vs-$arch" "php-dev"
+}
 
 if ($deps.Count -gt 0) {
     $baseurl = "https://downloads.php.net/~windows/php-sdk/deps"

@@ -30,6 +30,7 @@ for building and testing PHP extensions on Windows.
 - `ts`: thread-safety (`nts` or `ts`)
 - `deps`: dependency libraries to install; for now, only
   [core dependencies](https://windows.php.net/downloads/php-sdk/deps/) are available
+- `cache`: whether to cache the PHP SDK, PHP and development pack
 
 Note that for PHP versions 7.4 and below, `runs-on: windows-2022` will not work
 as the correct toolset is not available. For these versions, you should use
