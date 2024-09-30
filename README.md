@@ -52,8 +52,8 @@ strategy:
       - { os: windows-2022, php: "7.1" }
 ```
 
-Currently, `windows-2019` may be used for all PHP versions, although this may
-change in future releases.
+Currently, windows-2019 may be used for all PHP versions up to PHP 8.3.
+PHP 8.4 requires a newer image such as windows-2022.
 
 ### Manually Installing Toolsets
 

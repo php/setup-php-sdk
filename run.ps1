@@ -44,7 +44,7 @@ foreach ($toolset in (Get-ChildItem $dir)) {
 }
 $toolset = $toolsets.$vs
 if (-not $toolset) {
-    throw "toolset not available"
+    throw "no suitable toolset available on this runner"
 }
 
 if (-not (Test-Path "php-sdk")) {
