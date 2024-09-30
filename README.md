@@ -7,7 +7,7 @@ for building and testing PHP extensions on Windows.
 
 ````.yml
 - id: setup-php-sdk
-  uses: php/setup-php-sdk@v0.8
+  uses: php/setup-php-sdk@v0.10
   with:
     version: 8.0
     arch: x64
