@@ -54,6 +54,12 @@ strategy:
 
 Currently, windows-2019 may be used for all PHP versions up to PHP 8.3.
 PHP 8.4 requires a newer image such as windows-2022.
+Note that windows-2025 currently is not supported by phpize; to work around
+that, you need to force usage of the original JScript engine, by running
+```
+reg add "HKLM\Software\Policies\Microsoft\Internet Explorer\Main" /v JScriptReplacement /d 0 /f
+```
+prior to invoking `phpize`.
 
 ### Manually Installing Toolsets
 
