@@ -4,6 +4,15 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+# Ensure TLS 1.2/1.3 on older .NET / Windows PowerShell
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.SecurityProtocolType]::Tls12 -bor `
+    [Net.SecurityProtocolType]::Tls13
+
+function Get-ReleasesJson([string] $url) {
+    return Invoke-RestMethod -Uri $url -UseBasicParsing
+}
+
 $baseurl = "https://downloads.php.net/~windows/releases/archives"
 $releases = @{
     "7.0" = "7.0.33"
@@ -13,17 +22,22 @@ $releases = @{
     "7.4" = "7.4.33"
     "8.0" = "8.0.30"
 }
+
 $phpversion = $releases.$version
 if (-not $phpversion) {
     $baseurl = "https://downloads.php.net/~windows/releases"
     $url = "$baseurl/releases.json"
-    $releases = Invoke-WebRequest $url | ConvertFrom-Json
+
+    $releases = Get-ReleasesJson $url
     $phpversion = $releases.$version.version
+
     if (-not $phpversion) {
         $baseurl = "https://downloads.php.net/~windows/qa"
         $url = "$baseurl/releases.json"
-        $releases = Invoke-WebRequest $url | ConvertFrom-Json
+
+        $releases = Get-ReleasesJson $url
         $phpversion = $releases.$version.version
+
         if (-not $phpversion) {
             throw "unknown version"
         }
