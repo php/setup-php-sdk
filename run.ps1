@@ -9,6 +9,11 @@ param (
 
 $ErrorActionPreference = "Stop"
 
+# Ensure TLS 1.2/1.3 on older .NET / Windows PowerShell
+[Net.ServicePointManager]::SecurityProtocol = `
+    [Net.SecurityProtocolType]::Tls12 -bor `
+    [Net.SecurityProtocolType]::Tls13
+
 $versions = @{
     "7.0" = "vc14"
     "7.1" = "vc14"
@@ -53,7 +58,7 @@ if (-not (Test-Path "php-sdk")) {
 
     $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
     $url = "https://github.com/php/php-sdk-binary-tools/releases/download/php-sdk-2.3.0/php-sdk-binary-tools-php-sdk-2.3.0.zip"
-    Invoke-WebRequest $url -OutFile $temp
+    Invoke-WebRequest $url -OutFile $temp -UseBasicParsing
     Expand-Archive $temp -DestinationPath "."
     Rename-Item "php-sdk-binary-tools-php-sdk-2.3.0" "php-sdk"
 }
@@ -67,7 +72,7 @@ if (-not (Test-path "php-bin")) {
     $fname = "php-$revision-$tspart-$vs-$arch.zip"
     $url = "$baseurl/$fname"
     Write-Output "Downloading $url ..."
-    Invoke-WebRequest $url -OutFile $temp
+    Invoke-WebRequest $url -OutFile $temp -UseBasicParsing
     Expand-Archive $temp "php-bin"
 }
 
@@ -78,14 +83,14 @@ if (-not (Test-Path "php-dev")) {
     $fname = "php-devel-pack-$revision-$tspart-$vs-$arch.zip"
     $url = "$baseurl/$fname"
     Write-Output "Downloading $url ..."
-    Invoke-WebRequest $url -OutFile $temp
+    Invoke-WebRequest $url -OutFile $temp -UseBasicParsing
     Expand-Archive $temp "."
     Rename-Item "php-$revision-devel-$vs-$arch" "php-dev"
 }
 
 if ($deps.Count -gt 0) {
     $baseurl = "https://downloads.php.net/~windows/php-sdk/deps"
-    $series = Invoke-WebRequest "$baseurl/series/packages-$version-$vs-$arch-staging.txt"
+    $series = Invoke-WebRequest "$baseurl/series/packages-$version-$vs-$arch-staging.txt" -UseBasicParsing
     $remainder = @()
     $installed = $false
     foreach ($dep in $deps) {
@@ -95,7 +100,7 @@ if ($deps.Count -gt 0) {
                 $temp = New-TemporaryFile | Rename-Item -NewName {$_.Name + ".zip"} -PassThru
                 $url = "$baseurl/$vs/$arch/$line"
                 Write-Output "Downloading $url ..."
-                Invoke-WebRequest $url -OutFile $temp
+                Invoke-WebRequest $url -OutFile $temp -UseBasicParsing
                 Expand-Archive $temp "../deps"
                 $installed = $true
                 break
