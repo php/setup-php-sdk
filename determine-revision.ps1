@@ -5,9 +5,11 @@ param (
 $ErrorActionPreference = "Stop"
 
 # Ensure TLS 1.2/1.3 on older .NET / Windows PowerShell
-[Net.ServicePointManager]::SecurityProtocol = `
-    [Net.SecurityProtocolType]::Tls12 -bor `
-    [Net.SecurityProtocolType]::Tls13
+$securityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
+if ([Enum]::GetNames([Net.SecurityProtocolType]) -contains "Tls13") {
+    $securityProtocol = $securityProtocol -bor [Net.SecurityProtocolType]::Tls13
+}
+[Net.ServicePointManager]::SecurityProtocol = $securityProtocol
 
 function Get-ReleasesJson([string] $url) {
     return Invoke-RestMethod -Uri $url -UseBasicParsing
