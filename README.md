@@ -1,3 +1,7 @@
+> [!WARNING]
+> This repository has been archived, and is no longer maintained.
+> Please use [`php/php-windows-builder`](https://github.com/php/php-windows-builder) instead.
+
 # Setup PHP-SDK Action
 
 [Github Action](https://github.com/features/actions) to set up an environment
